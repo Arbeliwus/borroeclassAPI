@@ -61,6 +61,56 @@ def borrow_classroom():
         return jsonify({"message": "借用成功"}), 201
     except Exception as e:
         return jsonify({"message": f"借用失敗，錯誤：{str(e)}"}), 500
+    
+
+@app.route('/api/remainclass')
+
+def remain_class():
+    try:
+        name = request.args.get('name')
+        start_time = request.args.get('start_time')
+        end_time = request.args.get('end_time')
+        if not name or not start_time or not end_time:
+            return jsonify({"message": "請提供完整的查詢參數"}), 400
+        
+        start_dt = datetime.strptime(start_time, "%Y-%m-%d")
+        end_dt = datetime.strptime(end_time, "%Y-%m-%d")
+
+        delta_days = (end_dt - start_dt).days
+
+        one_month_days = 30
+
+        conn_str = f"DRIVER={{SQL Server}};SERVER={DB['server']},{DB['port']};DATABASE={DB['database']};UID={DB['username']};PWD={DB['password']}"
+
+        db = pyodbc.connect(conn_str)
+        cursor = db.cursor()
+        print("資料庫連接成功")
+
+        if delta_days <= one_month_days:
+            weekday_name = start_dt.strftime("%A")
+            sql = f"SELECT {weekday_name} FROM NHU_CST.dbo.classrooms WHERE name = ?"
+
+        else:
+
+            sql = f"SELECT * FROM NHU_CST.dbo.classrooms WHERE name = ?"
+
+        cursor.execute(sql, (name,))
+        result = cursor.fetchall()
+        result_dict = [dict(zip([column[0] for column in cursor.description], row)) for row in result]
+
+        cursor.close()
+        db.close()
+
+        if result_dict:
+            return jsonify({"result": result_dict}), 200
+        else:
+            return jsonify({"message": "未找到符合條件的資料"}), 404
+        
+    except Exception as e:
+        # 若發生錯誤，返回詳細錯誤信息
+        return jsonify({"message": f"借用查詢失敗，錯誤：{str(e)}"}), 500
+        
+
 
 if __name__ == '__main__':
     app.run(debug=True)
