@@ -19,7 +19,7 @@ app.register_blueprint(protected_routes)
 def home():
     return {"message": "Hello, Flask API is running!"}
 
-
+#申請借用教室
 @app.route('/api/borrow', methods=['POST'])
 def borrow_classroom():
     try:
@@ -62,7 +62,7 @@ def borrow_classroom():
     except Exception as e:
         return jsonify({"message": f"借用失敗，錯誤：{str(e)}"}), 500
     
-
+#顯示可借教室
 @app.route('/api/remainclass')
 
 def remain_class():
@@ -111,7 +111,21 @@ def remain_class():
         return jsonify({"message": f"借用查詢失敗，錯誤：{str(e)}"}), 500
         
 
+@app.route('/api/borrow_data')
+def borrow_data():
+    conn_str = f"DRIVER={{SQL Server}};SERVER={DB['server']},{DB['port']};DATABASE={DB['database']};UID={DB['username']};PWD={DB['password']}"
+    db = pyodbc.connect(conn_str)
+    cursor = db.cursor()
+    print("資料庫連接成功")
+    sql = f"SELECT *FROM [NHU_CST].[dbo].[borrow]"
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    result_dict = [dict(zip([column[0] for column in cursor.description], row)) for row in result]
 
+    cursor.close()
+    db.close()
+
+    return result_dict
 if __name__ == '__main__':
     app.run(debug=True)
 
