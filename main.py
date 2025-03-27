@@ -6,8 +6,12 @@ from flask import Flask, request, jsonify
 import pyodbc
 from datetime import datetime
 from config import DB
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 
 app = Flask(__name__)
+
+
+
 
 
 # 註冊藍圖（Blueprint）
@@ -64,7 +68,6 @@ def borrow_classroom():
     
 #顯示可借教室
 @app.route('/api/remainclass')
-
 def remain_class():
     try:
         name = request.args.get('name')
@@ -111,6 +114,39 @@ def remain_class():
         return jsonify({"message": f"借用查詢失敗，錯誤：{str(e)}"}), 500
         
 
+@app.route('/api/classstatus')
+def class_status():
+    try:
+        name = request.args.get('name')
+        if not name:
+            return jsonify({"message": "請提供有效的 name 參數"}), 400
+        conn_str = f"DRIVER={{SQL Server}};SERVER={DB['server']},{DB['port']};DATABASE={DB['database']};UID={DB['username']};PWD={DB['password']}"
+
+        db = pyodbc.connect(conn_str)
+        cursor = db.cursor()
+        print("資料庫連接成功")
+        sql = f"SELECT * FROM NHU_CST.dbo.classrooms WHERE name = ?"
+        cursor.execute(sql, (name,))
+        rows = cursor.fetchall()
+        if rows:
+            columns = [column[0] for column in cursor.description]  # 獲取欄位名稱
+            result = [dict(zip(columns, row)) for row in rows]  # 轉換成 list[dict]
+        else:
+            result = None
+
+        cursor.close()
+        db.close()
+        if result:
+            return jsonify({"result": result}), 200
+        else:
+            return jsonify({"message": "未找到符合條件的資料"}), 404
+    except Exception as e:
+        # 若發生錯誤，返回詳細錯誤信息
+        return jsonify({"message": f"借用查詢失敗，錯誤：{str(e)}"}), 500
+        
+
+
+# 顯示所有借用資料
 @app.route('/api/borrow_data')
 def borrow_data():
     conn_str = f"DRIVER={{SQL Server}};SERVER={DB['server']},{DB['port']};DATABASE={DB['database']};UID={DB['username']};PWD={DB['password']}"
@@ -126,6 +162,8 @@ def borrow_data():
     db.close()
 
     return result_dict
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
