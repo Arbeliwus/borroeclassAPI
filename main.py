@@ -2,6 +2,7 @@ from flask import Flask
 from routes.login import auth_routes
 from routes.db_test import db_routes
 from routes.JWT_API import protected_routes
+from utils.audit import review_routes
 from flask import Flask, request, jsonify
 import pyodbc
 from datetime import datetime
@@ -18,6 +19,7 @@ app = Flask(__name__)
 app.register_blueprint(auth_routes)
 app.register_blueprint(db_routes)
 app.register_blueprint(protected_routes)
+app.register_blueprint(review_routes)
 
 @app.route('/')
 def home():
