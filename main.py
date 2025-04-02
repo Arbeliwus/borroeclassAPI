@@ -115,7 +115,7 @@ def remain_class():
         # 若發生錯誤，返回詳細錯誤信息
         return jsonify({"message": f"借用查詢失敗，錯誤：{str(e)}"}), 500
         
-
+#查詢教室借出狀態
 @app.route('/api/classstatus')
 def class_status():
     try:
