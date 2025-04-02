@@ -93,11 +93,11 @@ def remain_class():
 
         if delta_days <= one_month_days:
             weekday_name = start_dt.strftime("%A")
-            sql = f"SELECT {weekday_name} FROM NHU_CST.dbo.classrooms WHERE name = ?"
+            sql = f"SELECT {weekday_name} FROM NHU_CST.dbo.classrooms WHERE name = ? AND created_at IS NOT NULL"
 
         else:
 
-            sql = f"SELECT * FROM NHU_CST.dbo.classrooms WHERE name = ?"
+            sql = f"SELECT * FROM NHU_CST.dbo.classrooms WHERE name = ? AND created_at IS NOT NULL"
 
         cursor.execute(sql, (name,))
         result = cursor.fetchall()
@@ -127,7 +127,7 @@ def class_status():
         db = pyodbc.connect(conn_str)
         cursor = db.cursor()
         print("資料庫連接成功")
-        sql = f"SELECT * FROM NHU_CST.dbo.classrooms WHERE name = ?"
+        sql = f"SELECT * FROM NHU_CST.dbo.classrooms WHERE name = ? AND created_at IS NOT NULL"
         cursor.execute(sql, (name,))
         rows = cursor.fetchall()
         if rows:
@@ -155,7 +155,7 @@ def borrow_data():
     db = pyodbc.connect(conn_str)
     cursor = db.cursor()
     print("資料庫連接成功")
-    sql = f"SELECT *FROM [NHU_CST].[dbo].[borrow]"
+    sql = f"SELECT *FROM [NHU_CST].[dbo].[borrow] WHERE created_at IS NOT NULL" 
     cursor.execute(sql)
     result = cursor.fetchall()
     result_dict = [dict(zip([column[0] for column in cursor.description], row)) for row in result]
