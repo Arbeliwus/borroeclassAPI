@@ -1,0 +1,15 @@
+pip install flask 
+pip install pyodbc
+pip install jwt
+
+
+{
+"sid":11010010,
+"cid": 1,
+"departments": "資工",
+"borrow_numbers":4, 
+"borrow_reason":"測試", 
+"start_date":"2025-03-15 14:00:00.000",
+"is_approved":0,
+}
+
