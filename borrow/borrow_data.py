@@ -29,6 +29,7 @@ def borrow_data():
     for row in result:
         row_dict = dict(zip(columns, row))
         ordered_row = OrderedDict([
+            ("id", row_dict.get("id")),
             ("sid", row_dict.get("sid")),
             ("cid", row_dict.get("cid")),
             ("departments", row_dict.get("departments")),

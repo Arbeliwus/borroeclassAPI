@@ -99,7 +99,7 @@ def all_class():
     cursor = db.cursor()
     print("資料庫連接成功")
 
-    sql = f"SELECT name FROM [NHU_CST].[dbo].[classrooms]"
+    sql = f"SELECT name FROM [NHU_CST].[dbo].[classrooms] where created_at IS NOT NULL"
 
     cursor.execute(sql,)
     rows = cursor.fetchall()

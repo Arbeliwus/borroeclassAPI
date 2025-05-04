@@ -9,6 +9,7 @@ from utils.audit import review_routes
 from utils.audit_delete import delete_routes
 from utils.audit_add import add_routes
 from utils.audit_edit import edit_routes
+from flask_cors import CORS
 from flask import Flask, request, jsonify
 import pyodbc
 from datetime import datetime
@@ -16,7 +17,7 @@ from config import DB
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 
 app = Flask(__name__)
-
+CORS(app)  # <<<< 加這一行！
 
 # 註冊藍圖（Blueprint）
 app.register_blueprint(auth_routes)
@@ -33,6 +34,8 @@ app.register_blueprint(edit_routes)
 
 
 if __name__ == '__main__':
+    
+    app.debug = True
     app.run(debug=True)
 
 '''#申請借用教室

@@ -71,7 +71,7 @@ def edit_class():
     id = data.pop("id")  #取出修改編號
 
     if not data:
-        return jsonify({"error": "沒有提供任何要更新的欄位"}), 400
+        return jsonify({"error": "沒有提供任何要更新的欄    位"}), 400
     
     update_fields = []
     values = []

@@ -25,8 +25,8 @@ def review():
     
     id = data['id']
     is_approved = data['is_approved']
-    approval_notes = data.get('approval_notes', '')
-
+    approval_notes = str(data.get('approval_notes', ''))
+    print("審核資料:", id,is_approved, approval_notes)
     
     try:
         conn_str = f"DRIVER={{SQL Server}};SERVER={DB['server']},{DB['port']};DATABASE={DB['database']};UID={DB['username']};PWD={DB['password']}"
@@ -36,8 +36,7 @@ def review():
         print("資料庫連接成功")
         sql = f"UPDATE [NHU_CST].[dbo].[borrow] SET is_approved = ?, approval_notes = ? WHERE id = ?;"
         cursor.execute(sql, (is_approved,approval_notes,id))
-        
- 
+        db.commit()
         cursor.close()
         db.close()
         return jsonify({"message": "審核成功"})
