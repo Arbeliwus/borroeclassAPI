@@ -1,3 +1,4 @@
+import json
 from flask import Blueprint, request, jsonify
 from flask import Flask
 from routes.login import auth_routes
@@ -35,12 +36,17 @@ def borrow_classroom():
         start_date = data.get('start_date', None) #開始時間
         end_date = data.get('end_date', None) #結束時間
         borrow_section = data.get('borrow_section', None) #使用說明
+        weekdays = data.get('weekdays', [])  # 新增：借用星期幾，預設空陣列
 
 
-        if not all([sid, cid, departments, borrow_numbers, borrow_reason, start_date]):
-            return jsonify({"message": "借用失敗，缺少必要參數"}), 400
+        if not all([sid, cid, departments, borrow_numbers, borrow_reason, start_date,end_date,borrow_section]):
+            return jsonify({"message": "借用失敗，每個項目皆為必填"}), 400
+        
+        weekdays_json = json.dumps(weekdays, ensure_ascii=False) 
         
         conn_str = f"DRIVER={{SQL Server}};SERVER={DB['server']},{DB['port']};DATABASE={DB['database']};UID={DB['username']};PWD={DB['password']}"
+        
+        
 
         db = pyodbc.connect(conn_str)
         cursor = db.cursor()
@@ -48,13 +54,21 @@ def borrow_classroom():
         sql = """
             INSERT INTO NHU_CST.dbo.borrow (
                 sid, cid, departments, borrow_numbers, borrow_reason, 
-                start_date, end_date, borrow_section, created_at, is_approved
+                start_date, end_date, borrow_section, borrow_weekdays, created_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
-        is_approved = 0
+        
+         # 根據教室名稱查找 id
+        cursor.execute("SELECT id FROM NHU_CST.dbo.classrooms WHERE name = ?", (cid,))
+        result = cursor.fetchone()
+        if not result:
+            return jsonify({"message": f"教室名稱 '{cid}' 無對應資料"}), 404
+
+        cid = result[0]  # 拿到對應的 cid
+        
         created_at = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        values = (sid, cid, departments, borrow_numbers, borrow_reason, start_date, end_date, borrow_section, created_at, is_approved)
+        values = (sid, cid, departments, borrow_numbers, borrow_reason, start_date, end_date, borrow_section, weekdays_json, created_at)
         cursor.execute(sql, values)
         db.commit()
         cursor.close()

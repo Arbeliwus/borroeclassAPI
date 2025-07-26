@@ -24,7 +24,7 @@ def token_required(f):
             decoded_token = jwt.decode(token, config.SECRET_KEY, algorithms=["HS256"])
             request.user = decoded_token
         except jwt.ExpiredSignatureError:
-            return jsonify({"error": "Token 已過期"}), 403
+            return jsonify({"error": "Token 已過期，請重新登入"}), 403
         except jwt.InvalidTokenError:
             return jsonify({"error": "無效的 Token"}), 403
 
